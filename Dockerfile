@@ -1,14 +1,11 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:17-jdk-slim
+FROM maven:3.9.2-eclipse-temurin-17-alpine as builder
 
-# Set the working directory inside the container
-WORKDIR /app
+COPY ./src src/
+COPY ./pom.xml pom.xml
 
-# Copy the JAR file into the container
-COPY target/hospital-ticketing-system-1.0.0.jar app.jar
+RUN mvn clean package -DskipTests
 
-# Expose the port that your Spring Boot app runs on
+FROM eclipse-temurin:17-jre-alpine
+COPY --from=builder target/*.jar app.jar
 EXPOSE 8080
-
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["java","-jar","app.jar"]
